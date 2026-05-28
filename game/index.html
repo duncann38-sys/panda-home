@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Panda Credits — The Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #3DBE6C;
+  --green-glow: rgba(61,190,108,0.4);
+  --gold: #f59e0b;
+  --red: #f87171;
+  --bg: #080808;
+}
+
+body {
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 16px 48px;
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* scanline overlay */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none; z-index: 9999;
+}
+
+#pg-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.1rem, 3vw, 1.6rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 10px;
+}
+#pg-title .g { color: var(--green); }
+#pg-subtitle {
+  font-size: 0.72rem; color: rgba(255,255,255,0.3);
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+#pg-shell {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1.5px solid rgba(255,255,255,0.07);
+  box-shadow:
+    0 0 0 1px rgba(61,190,108,0.08),
+    0 40px 80px rgba(0,0,0,0.8),
+    0 0 60px rgba(61,190,108,0.04);
+}
+
+#pgc { display: block; width: 100%; background: #0a0a0a; }
+
+/* flash overlay */
+#pg-flash {
+  position: absolute; inset: 0; z-index: 5;
+  pointer-events: none; opacity: 0;
+  transition: opacity 0.05s;
+  border-radius: 24px;
+}
+
+/* screens */
+.pg-screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 20px 18px;
+  text-align: center;
+  background: rgba(8,8,8,0.96);
+  backdrop-filter: blur(16px);
+  z-index: 10;
+  animation: pg-fade-in 0.35s cubic-bezier(0.16,1,0.3,1);
+  overflow-y: auto;
+}
+.pg-screen.hidden { display: none; }
+
+/* intro specific — scrollable, top-aligned so button never hides */
+#pg-intro {
+  justify-content: flex-start;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+/* arcade header strip */
+.pg-arcade-header {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(61,190,108,0.12), rgba(61,190,108,0.04));
+  border: 1px solid rgba(61,190,108,0.2);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.pg-arcade-header .ah-left { text-align: left; }
+.pg-arcade-header .ah-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem; font-weight: 800;
+  color: #fff; letter-spacing: -0.02em; line-height: 1;
+}
+.pg-arcade-header .ah-title span { color: var(--green); }
+.pg-arcade-header .ah-sub {
+  font-size: 0.62rem; color: rgba(255,255,255,0.35);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-top: 2px;
+}
+.pg-arcade-header .ah-panda {
+  font-size: 2.8rem; line-height: 1;
+  animation: pg-float 3s ease-in-out infinite;
+}
+
+/* how to play grid */
+.pg-how {
+  width: 100%; margin-bottom: 12px;
+}
+.pg-how-title {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em;
+  text-transform: uppercase; color: rgba(255,255,255,0.3);
+  margin-bottom: 8px;
+}
+.pg-how-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.pg-how-item {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px; padding: 8px 10px;
+  display: flex; align-items: center; gap: 8px;
+  text-align: left;
+}
+.pg-how-item .hi-emoji { font-size: 1.3rem; flex-shrink: 0; }
+.pg-how-item .hi-text  { font-size: 0.72rem; color: rgba(255,255,255,0.65); line-height: 1.3; }
+.pg-how-item .hi-val   { font-weight: 700; color: var(--green); display: block; font-size: 0.78rem; }
+.pg-how-item .hi-val.bad { color: var(--red); }
+.pg-how-item .hi-val.gold { color: var(--gold); }
+
+/* big play button */
+.pg-play-btn-wrap {
+  width: 100%; margin-top: 4px;
+}
+#pg-start-btn {
+  width: 100%; font-size: 1.1rem; padding: 18px;
+  border-radius: 14px; letter-spacing: 0.02em;
+}
+
+.pg-levels-tag {
+  font-size: 0.65rem; color: rgba(255,255,255,0.25);
+  margin-top: 8px; letter-spacing: 0.08em;
+}
+
+@keyframes pg-fade-in {
+  from { opacity:0; transform:translateY(12px) scale(0.98); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes pg-pop {
+  0%   { transform:scale(0) rotate(-10deg); opacity:0; }
+  65%  { transform:scale(1.15) rotate(3deg); }
+  100% { transform:scale(1) rotate(0deg); opacity:1; }
+}
+@keyframes pg-float {
+  0%,100% { transform:translateY(0) rotate(-2deg); }
+  50%     { transform:translateY(-10px) rotate(2deg); }
+}
+@keyframes pg-shimmer {
+  0%   { left: -100%; }
+  100% { left: 220%; }
+}
+@keyframes pg-pulse-ring {
+  0%   { transform:scale(1); opacity:0.7; }
+  100% { transform:scale(2.5); opacity:0; }
+}
+@keyframes pg-shake {
+  0%,100% { transform:translateX(0); }
+  20%     { transform:translateX(-8px); }
+  40%     { transform:translateX(8px); }
+  60%     { transform:translateX(-6px); }
+  80%     { transform:translateX(6px); }
+}
+@keyframes pg-rude-in {
+  0%   { transform:scale(0.5) rotate(-5deg); opacity:0; }
+  70%  { transform:scale(1.08) rotate(1deg); }
+  100% { transform:scale(1) rotate(0deg); opacity:1; }
+}
+@keyframes pg-glitch {
+  0%,90%,100% { clip-path: none; transform: none; }
+  91% { clip-path: inset(30% 0 40% 0); transform: translate(-4px, 0); }
+  93% { clip-path: inset(60% 0 10% 0); transform: translate(4px, 0); }
+  95% { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 0); }
+}
+
+/* eyebrow tag */
+.pg-ey {
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--green);
+  display: flex; align-items: center; gap: 7px; margin-bottom: 10px;
+  justify-content: center;
+}
+.pg-ey::before,.pg-ey::after { content:''; width:12px; height:1.5px; background:var(--green); border-radius:2px; }
+
+.pg-h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.9rem, 6vw, 2.9rem);
+  font-weight: 800; line-height: 1.05;
+  letter-spacing: -0.03em; color: #fff;
+  margin-bottom: 10px;
+}
+.pg-h1 .g { color: var(--green); }
+.pg-h1 .gold { color: var(--gold); }
+.pg-h1 .red { color: var(--red); }
+
+.pg-sub {
+  font-size: 0.86rem; color: rgba(255,255,255,0.45);
+  line-height: 1.75; max-width: 300px; margin: 0 auto 24px;
+}
+
+.pg-big-emoji {
+  font-size: 3.6rem; margin-bottom: 10px;
+  animation: pg-float 3.5s ease-in-out infinite;
+  display: block;
+}
+
+/* legend */
+.pg-legend {
+  display: flex; flex-wrap: wrap; gap: 7px;
+  justify-content: center; margin-bottom: 24px;
+}
+.pg-leg-item {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 100px; padding: 5px 11px;
+  font-size: 0.68rem; color: rgba(255,255,255,0.6);
+}
+.pg-leg-item .val { color: var(--green); font-weight: 700; }
+.pg-leg-item.bad .val { color: var(--red); }
+.pg-leg-item.gold .val { color: var(--gold); }
+
+/* buttons */
+.pg-btn {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem; font-weight: 800;
+  padding: 15px 40px; border-radius: 100px;
+  border: none; cursor: pointer; display: inline-block;
+  position: relative; overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+  letter-spacing: 0.01em; text-decoration: none;
+}
+.pg-btn::after {
+  content: ''; position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  animation: pg-shimmer 3s ease-in-out infinite 1s;
+}
+.pg-btn:active { transform: scale(0.96) !important; }
+.pg-btn.green  { background: var(--green); color: #fff; box-shadow: 0 8px 28px var(--green-glow); }
+.pg-btn.green:hover  { transform: translateY(-4px) scale(1.02); box-shadow: 0 16px 40px rgba(61,190,108,0.55); }
+.pg-btn.dark   { background: rgba(255,255,255,0.07); color: #fff; border: 1.5px solid rgba(255,255,255,0.12); }
+.pg-btn.dark:hover   { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
+.pg-btn.gold   { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; box-shadow: 0 8px 28px rgba(245,158,11,0.4); }
+.pg-btn.gold:hover   { transform: translateY(-4px) scale(1.02); box-shadow: 0 16px 40px rgba(245,158,11,0.55); }
+.pg-btn.red-btn { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 8px 28px rgba(239,68,68,0.4); }
+
+.pg-btn-sm {
+  font-size: 0.78rem; font-weight: 600; padding: 10px 24px;
+  border-radius: 100px; border: 1px solid rgba(255,255,255,0.09);
+  cursor: pointer;
+  background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.5);
+  margin-top: 10px; display: block; width: 100%; max-width: 260px;
+  transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+}
+.pg-btn-sm:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+/* stats */
+.pg-stats { display: flex; gap: 14px; margin-bottom: 20px; width: 100%; max-width: 280px; }
+.pg-stat-box {
+  flex: 1;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 14px 10px; text-align: center;
+}
+.pg-stat-n { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--green); display: block; }
+.pg-stat-n.gold-c { color: var(--gold); }
+.pg-stat-n.red-c  { color: var(--red); }
+.pg-stat-l { font-size: 0.58rem; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.12em; margin-top: 2px; display: block; }
+
+/* level badge */
+.pg-level-badge {
+  font-family: 'Syne', sans-serif;
+  font-size: 4rem; font-weight: 800;
+  color: var(--green); line-height: 1;
+  margin-bottom: 4px;
+  animation: pg-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.pg-level-badge.is-boss { color: var(--gold); animation: pg-pop 0.45s cubic-bezier(0.34,1.56,0.64,1) both, pg-glitch 4s infinite 1s; }
+.pg-level-label { font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 20px; }
+
+/* countdown */
+.pg-countdown-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 7rem; font-weight: 800;
+  color: var(--green); line-height: 1;
+  animation: pg-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  text-shadow: 0 0 40px var(--green-glow);
+}
+
+/* email / input */
+.pg-input {
+  width: 100%; max-width: 290px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.12);
+  border-radius: 12px; padding: 13px 16px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.92rem; color: #fff;
+  outline: none; margin-bottom: 10px; display: block;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.pg-input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(61,190,108,0.15);
+}
+.pg-input::placeholder { color: rgba(255,255,255,0.2); }
+
+/* code box */
+.pg-code-box {
+  background: rgba(61,190,108,0.08);
+  border: 1.5px solid rgba(61,190,108,0.35);
+  border-radius: 14px; padding: 18px 24px; margin: 14px 0;
+  font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800;
+  color: var(--green); letter-spacing: 0.18em;
+  animation: pg-pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  cursor: pointer; transition: background 0.2s;
+  position: relative;
+}
+.pg-code-box:hover { background: rgba(61,190,108,0.14); }
+.pg-code-box::after { content: ' 📋'; font-size: 0.9rem; opacity: 0.5; }
+
+/* paywall amount */
+.pg-paywall-amount {
+  font-family: 'Syne', sans-serif;
+  font-size: 5rem; font-weight: 800;
+  color: var(--gold); line-height: 1;
+  margin: 14px 0 4px;
+  animation: pg-pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  position: relative; display: inline-block;
+}
+.pg-paywall-amount::before {
+  content: '';
+  position: absolute; inset: -14px;
+  border-radius: 50%;
+  border: 2px solid rgba(245,158,11,0.25);
+  animation: pg-pulse-ring 2s ease-out infinite;
+}
+.pg-paywall-amount::after {
+  content: '';
+  position: absolute; inset: -28px;
+  border-radius: 50%;
+  border: 1px solid rgba(245,158,11,0.12);
+  animation: pg-pulse-ring 2s ease-out infinite 0.7s;
+}
+
+/* progress */
+.pg-progress { margin-bottom: 18px; width: 100%; max-width: 280px; }
+.pg-progress-track { height: 3px; background: rgba(255,255,255,0.07); border-radius: 3px; overflow: hidden; }
+.pg-progress-fill  { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 0 8px var(--green); }
+.pg-progress-label { display: flex; justify-content: space-between; font-size: 0.6rem; color: rgba(255,255,255,0.25); margin-bottom: 5px; }
+
+/* rude message box */
+.pg-rude {
+  background: rgba(239,68,68,0.1); border: 1.5px solid rgba(239,68,68,0.3);
+  border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+  font-size: 0.88rem; color: #fca5a5; font-weight: 600;
+  animation: pg-rude-in 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  max-width: 280px;
+}
+
+/* streak tag */
+.pg-streak {
+  background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05));
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 100px; padding: 6px 16px;
+  font-size: 0.7rem; color: var(--gold); font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+#pg-hint {
+  font-size: 0.66rem; color: rgba(255,255,255,0.18);
+  margin-top: 10px; letter-spacing: 0.06em; text-align: center;
+}
+
+/* non-intro screens scrollable too */
+#pg-level-announce, #pg-gameover, #pg-paywall, #pg-email, #pg-code {
+  justify-content: center;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+.boss-warning {
+  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(239,68,68,0.08));
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 12px; padding: 12px 20px;
+  font-size: 0.78rem; color: rgba(255,220,100,0.8);
+  margin-bottom: 16px; max-width: 270px;
+  line-height: 1.6;
+}
+</style>
+</head>
+<body>
+
+<div id="pg-title">🐼 <span class="g">Panda</span> Credits</div>
+<div id="pg-subtitle">Catch credits · Dodge fees · Unlock launch perks</div>
+
+<div id="pg-shell">
+  <canvas id="pgc"></canvas>
+  <div id="pg-flash"></div>
+
+  <!-- INTRO -->
+  <div class="pg-screen" id="pg-intro">
+
+    <!-- arcade header -->
+    <div class="pg-arcade-header">
+      <div class="ah-left">
+        <div class="ah-title">🐼 <span>Panda</span> Credits</div>
+        <div class="ah-sub">10 Levels · Catch &amp; Dodge · Win Perks</div>
+      </div>
+      <div class="ah-panda">🎮</div>
+    </div>
+
+    <!-- objective strip -->
+    <div class="pg-ey" style="margin-bottom:8px">How to play</div>
+    <div class="pg-how">
+      <div class="pg-how-grid">
+        <div class="pg-how-item">
+          <span class="hi-emoji">🐼</span>
+          <div class="hi-text"><span class="hi-val">+10 credits</span>Catch the panda</div>
+        </div>
+        <div class="pg-how-item">
+          <span class="hi-emoji">💳</span>
+          <div class="hi-text"><span class="hi-val">+50 credits</span>Card bonus</div>
+        </div>
+        <div class="pg-how-item">
+          <span class="hi-emoji">🍗</span>
+          <div class="hi-text"><span class="hi-val">+25 credits</span>Venue drop</div>
+        </div>
+        <div class="pg-how-item">
+          <span class="hi-emoji">⚡</span>
+          <div class="hi-text"><span class="hi-val gold">2× multiplier</span>Power-up!</div>
+        </div>
+        <div class="pg-how-item">
+          <span class="hi-emoji">🛡️</span>
+          <div class="hi-text"><span class="hi-val" style="color:#38bdf8">SHIELD</span>Blocks next fee hit</div>
+        </div>
+        <div class="pg-how-item">
+          <span class="hi-emoji">🚀</span>
+          <div class="hi-text"><span class="hi-val" style="color:#c084fc">WIDE BASKET</span>8 seconds boost</div>
+        </div>
+        <div class="pg-how-item" style="grid-column:span 2">
+          <span class="hi-emoji">💸</span>
+          <div class="hi-text"><span class="hi-val bad">−1 LIFE · AVOID</span>Hidden fee bomb — don't catch it!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- mission statement -->
+    <div style="background:rgba(61,190,108,0.07);border:1px solid rgba(61,190,108,0.15);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:0.75rem;color:rgba(255,255,255,0.5);line-height:1.6;width:100%">
+      🏆 <strong style="color:rgba(255,255,255,0.8)">Earn real Panda credit.</strong> Complete all 10 levels, grab your unique code — credits convert to £££ when Panda launches.
+    </div>
+
+    <!-- CTA -->
+    <div class="pg-play-btn-wrap">
+      <button class="pg-btn green" id="pg-start-btn">▶ TAP TO PLAY</button>
+    </div>
+    <p class="pg-levels-tag">10 levels · 3 lives · levels 8–10 unlock for £3</p>
+  </div>
+
+  <!-- LEVEL ANNOUNCE -->
+  <div class="pg-screen hidden" id="pg-level-announce">
+    <div class="pg-ey" id="pla-ey">Level</div>
+    <div class="pg-level-badge" id="pla-num">1</div>
+    <div class="pg-level-label" id="pla-label">GET READY</div>
+    <p class="pg-sub" id="pla-desc">Catch the Panda Credits!</p>
+    <div id="pla-boss-warning" class="boss-warning" style="display:none">
+      ⚠️ <strong>FINAL BOSS.</strong> Triple credits · Maximum speed · Everything drops at once.
+    </div>
+    <div class="pg-progress">
+      <div class="pg-progress-label"><span>Progress</span><span id="pla-progress-label">1 / 8</span></div>
+      <div class="pg-progress-track"><div class="pg-progress-fill" id="pla-progress-fill" style="width:12%"></div></div>
+    </div>
+    <div class="pg-stats" id="pla-stats" style="display:none">
+      <div class="pg-stat-box"><span class="pg-stat-n" id="pla-level-credits">0</span><span class="pg-stat-l">This Level</span></div>
+      <div class="pg-stat-box"><span class="pg-stat-n gold-c" id="pla-total-credits">0</span><span class="pg-stat-l">Total</span></div>
+    </div>
+    <button class="pg-btn green" id="pla-btn">Start →</button>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="pg-screen hidden" id="pg-countdown">
+    <div class="pg-ey" id="pg-cd-ey">Get ready</div>
+    <div class="pg-countdown-num" id="pg-cd-num">3</div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div class="pg-screen hidden" id="pg-gameover">
+    <span class="pg-big-emoji" id="pgo-emoji">😅</span>
+    <div class="pg-ey">Game Over</div>
+    <h1 class="pg-h1" id="pgo-title">Out of<br/><span class="red">lives.</span></h1>
+    <div id="pgo-rude" class="pg-rude" style="display:none"></div>
+    <div class="pg-stats">
+      <div class="pg-stat-box"><span class="pg-stat-n" id="pgo-level">1</span><span class="pg-stat-l">Level</span></div>
+      <div class="pg-stat-box"><span class="pg-stat-n gold-c" id="pgo-credits">0</span><span class="pg-stat-l">Credits</span></div>
+      <div class="pg-stat-box"><span class="pg-stat-n red-c" id="pgo-deaths">0</span><span class="pg-stat-l">Deaths</span></div>
+    </div>
+    <button class="pg-btn green" id="pgo-retry">Try Again →</button>
+    <button class="pg-btn-sm" id="pgo-claim">Claim my <span id="pgo-credits-btn">0</span> credits anyway</button>
+  </div>
+
+  <!-- PAYWALL — mandatory, no skip -->
+  <div class="pg-screen hidden" id="pg-paywall">
+    <div class="pg-ey">Levels 8, 9 &amp; 10 · Locked</div>
+    <div class="pg-paywall-amount">£3</div>
+    <p style="font-size:0.68rem;color:rgba(255,255,255,0.25);margin-bottom:16px;">One time · Unlocks all 3 final levels</p>
+    <h1 class="pg-h1" style="font-size:clamp(1.2rem,4vw,1.8rem)">The <span class="gold">Final 3 Levels.</span></h1>
+    <p class="pg-sub" style="font-size:0.78rem">Triple credits on every catch. 💎 Diamond drops. 🛡️ More boosts. A <strong style="color:var(--gold)">founder's code worth £10</strong> off your first Panda transaction.</p>
+    <div class="pg-streak">🔥 You've already earned <span id="pw-credits-earned">0</span> credits — don't stop now</div>
+    <button class="pg-btn gold" id="pgpw-pay-btn" style="width:100%">Pay £3 &amp; Unlock Levels 8–10 →</button>
+    <p style="font-size:0.62rem;color:rgba(255,255,255,0.2);margin-top:10px">Secure payment via Stripe · No subscription · One time only</p>
+  </div>
+
+  <!-- EMAIL CAPTURE / GATE -->
+  <div class="pg-screen hidden" id="pg-email">
+    <span style="font-size:2.8rem;margin-bottom:8px;display:block">🔒</span>
+    <div class="pg-ey" id="pge-ey">Unlock Levels 8, 9 &amp; 10</div>
+    <h1 class="pg-h1" style="font-size:clamp(1.4rem,5vw,2rem)"><span id="pge-heading">You've earned</span><br/><span class="g" id="pge-total">0</span> credits!</h1>
+    <p class="pg-sub" style="font-size:0.8rem" id="pge-subtext">Enter your details to unlock the final 3 levels and claim your credits at launch.</p>
+    <input class="pg-input" type="email" id="pge-email" placeholder="your@email.com"/>
+    <input class="pg-input" type="text"  id="pge-name"  placeholder="Your name" style="margin-bottom:14px"/>
+    <button class="pg-btn green" id="pge-submit">Continue to Unlock →</button>
+  </div>
+
+  <!-- CODE REVEALED -->
+  <div class="pg-screen hidden" id="pg-code">
+    <span style="font-size:2.8rem;margin-bottom:8px;display:block">🐼</span>
+    <div class="pg-ey">Your Code</div>
+    <h1 class="pg-h1" style="font-size:clamp(1.3rem,4vw,1.9rem)">Screenshot &amp;<br/><span class="g">save this.</span></h1>
+    <div class="pg-code-box" id="pgc-code" title="Tap to copy">PANDA-XXXX</div>
+    <p style="font-size:0.75rem;color:rgba(255,255,255,0.35);margin-bottom:18px">
+      Worth <strong id="pgc-worth" style="color:var(--green)">£0</strong> in real Panda credit at launch · Valid forever
+    </p>
+    <a id="pgc-email-link" href="#" class="pg-btn green" style="margin-bottom:10px">📧 Email me my code</a>
+    <button class="pg-btn-sm" id="pgc-play-again">Play again →</button>
+  </div>
+
+</div>
+
+<p id="pg-hint" style="margin-top:10px">← → arrow keys · mouse · swipe on mobile</p>
+
+<script>
+(function(){
+'use strict';
+
+// ─── LEVEL CONFIGS ──────────────────────────────────────────
+// Levels 1-7 free. Level 7 complete → email capture → paywall → levels 8-10
+const LEVEL_CONFIGS = [
+  { time:22, speed:2.0, spawn:1.8, feeChance:0.00, cardChance:0.06, starChance:0.04, venueChance:0.08, boostChance:0.05, bonus:50,  label:'Warm Up',        desc:'Catch the pandas — move your basket!',   isBoss:false },
+  { time:24, speed:2.6, spawn:1.5, feeChance:0.00, cardChance:0.08, starChance:0.05, venueChance:0.10, boostChance:0.06, bonus:80,  label:'Getting Faster',  desc:'Speed rising. Stay sharp.',              isBoss:false },
+  { time:25, speed:3.1, spawn:1.3, feeChance:0.12, cardChance:0.10, starChance:0.06, venueChance:0.10, boostChance:0.06, bonus:110, label:'Fee Alert!',      desc:'💸 Fee bombs drop now. DODGE THEM.',      isBoss:false },
+  { time:26, speed:3.5, spawn:1.1, feeChance:0.16, cardChance:0.12, starChance:0.07, venueChance:0.12, boostChance:0.07, bonus:150, label:'Mid Game',        desc:'Build that combo streak! Use the 🛡️',   isBoss:false },
+  { time:27, speed:4.0, spawn:0.90,feeChance:0.20, cardChance:0.14, starChance:0.08, venueChance:0.12, boostChance:0.07, bonus:180, label:'Hot Streak',      desc:'Fees are everywhere. Use every boost.',  isBoss:false },
+  { time:28, speed:4.5, spawn:0.72,feeChance:0.24, cardChance:0.16, starChance:0.09, venueChance:0.14, boostChance:0.08, bonus:220, label:'Almost There',    desc:'Last free level. Give it everything.',   isBoss:false },
+  { time:34, speed:5.8, spawn:0.48,feeChance:0.30, cardChance:0.18, starChance:0.10, venueChance:0.14, boostChance:0.08, bonus:300, label:'The Gauntlet',    desc:'Survive this and you unlock the big 3.', isBoss:false },
+  // PAID — levels 8, 9, 10 locked behind £3 paywall
+  { time:36, speed:6.2, spawn:0.42,feeChance:0.26, cardChance:0.20, starChance:0.11, venueChance:0.16, boostChance:0.09, bonus:600, label:'LOCKED LEVEL 8', desc:'Triple credits begin. Stay alive.',       isBoss:true, tripleCredits:true },
+  { time:38, speed:7.0, spawn:0.34,feeChance:0.28, cardChance:0.22, starChance:0.12, venueChance:0.16, boostChance:0.09, bonus:800, label:'LOCKED LEVEL 9', desc:'Max chaos. Everything drops at once.',   isBoss:true, tripleCredits:true },
+  { time:42, speed:7.8, spawn:0.26,feeChance:0.30, cardChance:0.24, starChance:0.14, venueChance:0.18, boostChance:0.10, bonus:1500,label:'FINAL BOSS 🔥',   desc:'ONE CHANCE. This is it. GO.',            isBoss:true, tripleCredits:true },
+];
+
+const ITEM_TYPES = {
+  panda:   { emoji:'🐼', value:10,  color:'#3DBE6C', size:36, good:true  },
+  card:    { emoji:'💳', value:50,  color:'#b4ff78', size:38, good:true  },
+  venue:   { emoji:'🍗', value:25,  color:'#3DBE6C', size:36, good:true  },
+  star:    { emoji:'⚡', value:0,   color:'#f59e0b', size:36, good:true  },
+  fee:     { emoji:'💸', value:-1,  color:'#f87171', size:36, good:false },
+  diamond: { emoji:'💎', value:100, color:'#67e8f9', size:38, good:true  }, // paid levels only
+  rocket:  { emoji:'🚀', value:0,   color:'#c084fc', size:36, good:true  }, // widens basket 8s
+  shield:  { emoji:'🛡️', value:0,   color:'#38bdf8', size:36, good:true  }, // blocks next fee hit
+};
+
+// ─── RUDE MESSAGES — tiered by level ────────────────────────
+// Each tier is an array; we pick randomly within tier
+const RUDE_TIERS = {
+  5: [ // mildly disappointed
+    "Unlucky... but you should've seen that coming.",
+    "That fee had your name on it from a mile away.",
+    "Close. But not close enough.",
+    "You were doing so well... 😬",
+  ],
+  6: [ // getting rude
+    "Mate. That was genuinely embarrassing.",
+    "My nan plays better than this. No joke.",
+    "Are you even watching the screen?",
+    "Touch grass. Come back with focus.",
+    "The fees are winning. EMBARRASSING.",
+  ],
+  7: [ // properly rude
+    "Bro literally just dodge the 💸 — it's ONE THING.",
+    "You absolute muppet 😭",
+    "This is painful to watch.",
+    "Skills issue. Major, major skills issue.",
+    "At this rate you're paying US.",
+    "I've seen better plays from a potato.",
+  ],
+  8: [ // savage — paid level, they're frustrated
+    "You PAID £3 for this performance? 💀",
+    "Sir this is a Wendy's. Also you're terrible.",
+    "Your ancestors are watching. They are disappointed.",
+    "The audacity to be this bad after paying £3.",
+    "Did your thumbs just give up? Because it looks like it.",
+    "I'm actually embarrassed for you right now.",
+  ],
+  9: [ // furious
+    "WHAT ARE YOU DOING?! 😤😤😤",
+    "You have the reflexes of a tired sloth.",
+    "Stop. Just stop. Think. Then move. THEN MOVE.",
+    "Every fee you catch is a personal insult to me.",
+    "I am genuinely losing my mind watching this.",
+    "MOVE. LEFT. OR. RIGHT. THAT IS LITERALLY IT.",
+  ],
+  10: [ // unhinged final boss
+    "THIS IS THE FINAL LEVEL AND YOU'RE CATCHING FEES?! 💀💀💀",
+    "I have never seen anything like this. And I've seen a lot.",
+    "The pandas are filing a complaint. Against YOU.",
+    "You are single-handedly keeping the fee economy alive.",
+    "Bro woke up and chose violence against himself.",
+    "I can't. I simply cannot. Try again. PLEASE.",
+    "At this point the fees are your friends. Pathetic.",
+  ],
+};
+function getRudeMsg(level) {
+  const tier = level >= 10 ? 10 : level >= 9 ? 9 : level >= 8 ? 8 : level >= 7 ? 7 : level >= 6 ? 6 : 5;
+  const msgs = RUDE_TIERS[tier];
+  return msgs[Math.floor(Math.random() * msgs.length)];
+}
+
+// ─── STATE ──────────────────────────────────────────────────
+let S = {
+  screen:'intro', level:1, lives:3, levelCredits:0, totalCredits:0,
+  multiplier:1, multTimer:0, combo:0, bestCombo:0, timeLeft:0,
+  spawnTimer:0, items:[], particles:[], popups:[], trails:[],
+  player:{ x:0, y:0, w:74, h:22, targetX:0, wobble:0 },
+  shake:{ x:0, y:0, time:0, intensity:0 },
+  running:false, raf:null, lastTs:0,
+  playerName:'', playerEmail:'', uniqueCode:'',
+  totalDeaths:0, levelDeaths:0,
+  paidUnlocked:false, isBossLevel:false,
+  bgHue:0, dangerPulse:0,
+  shieldActive:false,
+  rocketTimer:0, // widens basket
+};
+
+// ─── CANVAS ─────────────────────────────────────────────────
+const shell  = document.getElementById('pg-shell');
+const canvas = document.getElementById('pgc');
+const ctx    = canvas.getContext('2d');
+const flash  = document.getElementById('pg-flash');
+let CW, CH;
+
+function resize() {
+  const maxW = Math.min(shell.clientWidth, 440);
+  CW = canvas.width  = maxW;
+  CH = canvas.height = Math.round(maxW * 1.12);
+  canvas.style.width  = maxW + 'px';
+  canvas.style.height = CH + 'px';
+  S.player.x = CW / 2;
+  S.player.y = CH - 42;
+  S.player.targetX = CW / 2;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ─── VIBRATION ──────────────────────────────────────────────
+function vibrate(pattern) {
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e){}
+}
+
+// ─── FLASH OVERLAY ──────────────────────────────────────────
+function flashScreen(color, dur) {
+  flash.style.background = color;
+  flash.style.opacity = '0.35';
+  setTimeout(() => { flash.style.opacity = '0'; }, dur || 120);
+}
+
+// ─── AUDIO ──────────────────────────────────────────────────
+let audioCtx;
+function getAC() {
+  if (!audioCtx) try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+  return audioCtx;
+}
+function tone(freq, type, dur, gain, freqEnd) {
+  const ac = getAC(); if(!ac) return;
+  try {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, ac.currentTime);
+    if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, ac.currentTime + dur);
+    g.gain.setValueAtTime(gain || 0.12, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    o.start(); o.stop(ac.currentTime + dur);
+  } catch(e){}
+}
+function chord(freqs, type, dur, gain) {
+  freqs.forEach((f,i) => setTimeout(() => tone(f, type, dur, gain), i*0));
+}
+
+function sfxCatch()   {
+  tone(523, 'sine', 0.08, 0.12);
+  setTimeout(() => tone(659, 'sine', 0.08, 0.1), 50);
+}
+function sfxCard()    {
+  tone(784, 'triangle', 0.08, 0.15);
+  setTimeout(() => tone(988, 'sine', 0.1, 0.14), 60);
+  setTimeout(() => tone(1319, 'sine', 0.15, 0.12), 130);
+}
+function sfxStar()    {
+  [1047,1319,1568].forEach((f,i) => setTimeout(()=>tone(f,'triangle',0.12,0.12),i*40));
+}
+function sfxFee()     {
+  tone(180, 'sawtooth', 0.06, 0.2, 80);
+  setTimeout(() => tone(90, 'sawtooth', 0.2, 0.18), 60);
+}
+function sfxCombo(n)  {
+  const base = 300 + n * 35;
+  tone(base, 'sine', 0.12, 0.14);
+  setTimeout(() => tone(base * 1.25, 'sine', 0.1, 0.12), 80);
+}
+function sfxLevelUp() {
+  [392,494,587,740,880].forEach((f,i)=>setTimeout(()=>tone(f,'sine',0.18,0.14),i*70));
+}
+function sfxGameOver(){
+  [440,370,311,261].forEach((f,i)=>setTimeout(()=>tone(f,'sawtooth',0.2,0.14),i*110));
+}
+function sfxDiamond() {
+  [1319,1568,2093].forEach((f,i)=>setTimeout(()=>tone(f,'sine',0.2,0.16),i*50));
+}
+function sfxCountdown(n) {
+  if (n > 0) tone(n===1?800:600, 'sine', 0.15, 0.18);
+  else chord([523,659,784], 'sine', 0.3, 0.15);
+}
+function sfxUrgentBeep() {
+  tone(800, 'square', 0.05, 0.08);
+}
+function sfxShield() {
+  [300,400,500,600].forEach((f,i) => setTimeout(()=>tone(f,'triangle',0.1,0.13),i*35));
+}
+function sfxRocket() {
+  tone(400,'sawtooth',0.05,0.1,600);
+  setTimeout(()=>tone(800,'triangle',0.15,0.12),80);
+}
+
+// ─── INPUT ──────────────────────────────────────────────────
+let keys = {};
+window.addEventListener('keydown', e => {
+  keys[e.key] = true;
+  if ((e.key==='ArrowLeft'||e.key==='ArrowRight') && S.screen==='playing') e.preventDefault();
+});
+window.addEventListener('keyup', e => { keys[e.key] = false; });
+
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  S.player.targetX = (e.clientX - r.left) * (CW / r.width);
+});
+
+let touchX = null;
+canvas.addEventListener('touchstart', e => {
+  const r = canvas.getBoundingClientRect();
+  touchX = (e.touches[0].clientX - r.left) * (CW / r.width);
+  e.preventDefault();
+}, {passive:false});
+canvas.addEventListener('touchmove', e => {
+  const r = canvas.getBoundingClientRect();
+  touchX = (e.touches[0].clientX - r.left) * (CW / r.width);
+  e.preventDefault();
+}, {passive:false});
+canvas.addEventListener('touchend', () => { touchX = null; }, {passive:false});
+
+// ─── SCREENS ────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.pg-screen').forEach(s => s.classList.add('hidden'));
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.remove('hidden');
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = '';
+  }
+  S.screen = id === 'pgc' ? 'playing' : id;
+}
+function hideScreens() {
+  document.querySelectorAll('.pg-screen').forEach(s => s.classList.add('hidden'));
+  S.screen = 'playing';
+}
+
+// ─── SPAWN ──────────────────────────────────────────────────
+function spawnItem() {
+  const cfg = LEVEL_CONFIGS[S.level - 1];
+  let type = 'panda';
+  const r = Math.random();
+  const dc  = cfg.feeChance;
+  const cc  = dc + cfg.cardChance;
+  const sc  = cc + cfg.starChance;
+  const vc  = sc + cfg.venueChance;
+  const boc = vc + cfg.boostChance;         // rocket boost
+  const shc = boc + cfg.boostChance * 0.7;  // shield
+  const dmc = shc + (cfg.isBoss ? 0.07 : 0);// diamond — paid levels only
+
+  if (r < dc)  type = 'fee';
+  else if (r < cc)  type = 'card';
+  else if (r < sc)  type = 'star';
+  else if (r < vc)  type = 'venue';
+  else if (r < boc) type = 'rocket';
+  else if (r < shc) type = 'shield';
+  else if (r < dmc) type = 'diamond';
+
+  const def = ITEM_TYPES[type];
+  const margin = def.size + 4;
+  S.items.push({
+    type, def,
+    x: margin + Math.random() * (CW - margin * 2),
+    y: -def.size,
+    vy: cfg.speed + Math.random() * 1.5,
+    vx: (Math.random() - 0.5) * (cfg.isBoss ? 1.4 : 0.9),
+    rotation: 0,
+    rotSpeed: (Math.random() - 0.5) * 0.07,
+    scale: 0.1, alpha: 0,
+    wobble: Math.random() * Math.PI * 2,
+  });
+}
+
+// ─── PARTICLES ──────────────────────────────────────────────
+function burst(x, y, color, count, big) {
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 / count) * i + Math.random() * 0.6;
+    const speed = (big ? 4 : 2.5) + Math.random() * (big ? 5 : 3.5);
+    S.particles.push({
+      x, y, color,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - (big ? 3 : 1.5),
+      life: 1, decay: 0.025 + Math.random() * 0.02,
+      size: (big ? 5 : 3) + Math.random() * (big ? 6 : 4),
+      type: big ? 'star' : 'circle',
+    });
+  }
+}
+function popup(x, y, text, color) {
+  S.popups.push({ x, y, text, color: color||'#3DBE6C', life:1, vy:-1.8, scale:1 });
+}
+function addTrail(x, y) {
+  S.trails.push({ x, y, life:1, decay:0.12 });
+}
+
+// ─── SHAKE ──────────────────────────────────────────────────
+function shakeScreen(intensity) {
+  S.shake.time = 0.35;
+  S.shake.intensity = intensity;
+}
+
+// ─── GAME LOOP ──────────────────────────────────────────────
+function gameLoop(ts) {
+  if (!S.running) return;
+  const dt = Math.min((ts - S.lastTs) / 1000, 0.05);
+  S.lastTs = ts;
+  update(dt);
+  draw();
+  S.raf = requestAnimationFrame(gameLoop);
+}
+
+function update(dt) {
+  const cfg = LEVEL_CONFIGS[S.level - 1];
+
+  S.timeLeft -= dt;
+  if (S.timeLeft <= 0) { levelComplete(); return; }
+
+  // urgent beep in last 5 seconds
+  if (S.timeLeft < 5 && Math.floor(S.timeLeft + dt) !== Math.floor(S.timeLeft)) {
+    sfxUrgentBeep();
+  }
+
+  S.dangerPulse = S.timeLeft < 8 ? (Math.sin(Date.now() * 0.008) * 0.5 + 0.5) : 0;
+
+  if (S.multTimer > 0) {
+    S.multTimer -= dt;
+    if (S.multTimer <= 0) { S.multiplier = 1; S.multTimer = 0; }
+  }
+  if (S.rocketTimer > 0) {
+    S.rocketTimer -= dt;
+    if (S.rocketTimer <= 0) { S.rocketTimer = 0; S.player.w = 74; }
+  }
+
+  // shake
+  if (S.shake.time > 0) {
+    S.shake.time -= dt;
+    S.shake.x = (Math.random() - 0.5) * S.shake.intensity * 12;
+    S.shake.y = (Math.random() - 0.5) * S.shake.intensity * 12;
+  } else { S.shake.x = 0; S.shake.y = 0; }
+
+  // player
+  const speed = 8;
+  if (keys['ArrowLeft'])  S.player.targetX -= speed;
+  if (keys['ArrowRight']) S.player.targetX += speed;
+  if (touchX !== null) S.player.targetX = touchX;
+  S.player.targetX = Math.max(S.player.w/2, Math.min(CW - S.player.w/2, S.player.targetX));
+
+  const dx = S.player.targetX - S.player.x;
+  S.player.x += dx * 0.24;
+  S.player.wobble = Math.abs(dx) > 3 ? (dx > 0 ? 0.06 : -0.06) : S.player.wobble * 0.85;
+
+  // trail
+  if (Math.abs(dx) > 6) addTrail(S.player.x, S.player.y);
+
+  // spawn
+  S.spawnTimer -= dt;
+  if (S.spawnTimer <= 0) {
+    spawnItem();
+    if (cfg.isBoss && Math.random() < 0.4) spawnItem(); // double spawn on boss
+    S.spawnTimer = cfg.spawn * (0.75 + Math.random() * 0.5);
+  }
+
+  // items
+  for (let i = S.items.length - 1; i >= 0; i--) {
+    const item = S.items[i];
+    item.y  += item.vy;
+    item.x  += item.vx + Math.sin(item.wobble) * 0.3;
+    item.wobble += 0.04;
+    item.rotation += item.rotSpeed;
+    item.scale = Math.min(1, item.scale + 0.18);
+    item.alpha = Math.min(1, item.alpha + 0.18);
+
+    // wall bounce
+    if (item.x < item.def.size * 0.5) { item.x = item.def.size * 0.5; item.vx *= -0.7; }
+    if (item.x > CW - item.def.size * 0.5) { item.x = CW - item.def.size * 0.5; item.vx *= -0.7; }
+
+    const cdx = item.x - S.player.x;
+    const cdy = item.y - (S.player.y - 8);
+    const catchW = S.player.w / 2 + item.def.size * 0.38;
+    const catchH = 26;
+
+    if (Math.abs(cdx) < catchW && Math.abs(cdy) < catchH) {
+      catchItem(item);
+      S.items.splice(i, 1);
+      continue;
+    }
+    if (item.y > CH + 30) S.items.splice(i, 1);
+  }
+
+  // particles
+  for (let i = S.particles.length - 1; i >= 0; i--) {
+    const p = S.particles[i];
+    p.x += p.vx; p.y += p.vy;
+    p.vy += 0.15; p.vx *= 0.97;
+    p.life -= p.decay;
+    if (p.life <= 0) S.particles.splice(i, 1);
+  }
+
+  // popups
+  for (let i = S.popups.length - 1; i >= 0; i--) {
+    const p = S.popups[i];
+    p.y += p.vy; p.vy *= 0.95;
+    p.life -= 0.02;
+    if (p.life <= 0) S.popups.splice(i, 1);
+  }
+
+  // trails
+  for (let i = S.trails.length - 1; i >= 0; i--) {
+    const t = S.trails[i];
+    t.life -= t.decay;
+    if (t.life <= 0) S.trails.splice(i, 1);
+  }
+
+  S.bgHue = (S.bgHue + dt * 8) % 360;
+}
+
+function catchItem(item) {
+  const cfg = LEVEL_CONFIGS[S.level - 1];
+  if (item.type === 'fee') {
+    if (S.shieldActive) {
+      // shield absorbs the hit
+      S.shieldActive = false;
+      sfxShield();
+      burst(item.x, item.y, '#38bdf8', 16, false);
+      popup(item.x, item.y - 20, '🛡️ BLOCKED!', '#38bdf8');
+      flashScreen('rgba(56,189,248,0.15)', 120);
+      vibrate(20);
+      return;
+    }
+    S.lives--;
+    S.totalDeaths++;
+    S.levelDeaths++;
+    S.combo = 0;
+    sfxFee();
+    burst(item.x, item.y, '#f87171', 14, false);
+    popup(item.x, item.y - 20, '💸 −LIFE!', '#f87171');
+    shakeScreen(1.2);
+    flashScreen('rgba(239,68,68,0.25)', 180);
+    vibrate([80, 30, 80]);
+    if (S.lives <= 0) { setTimeout(gameOver, 350); S.running = false; return; }
+  } else if (item.type === 'star') {
+    S.multiplier = 2; S.multTimer = 7;
+    sfxStar();
+    burst(item.x, item.y, '#f59e0b', 20, false);
+    popup(item.x, item.y - 20, '⚡ 2× MULTIPLIER!', '#f59e0b');
+    flashScreen('rgba(245,158,11,0.1)', 100);
+    vibrate(40);
+    S.combo++;
+  } else if (item.type === 'shield') {
+    S.shieldActive = true;
+    sfxShield();
+    burst(item.x, item.y, '#38bdf8', 18, false);
+    popup(item.x, item.y - 20, '🛡️ SHIELD ON!', '#38bdf8');
+    flashScreen('rgba(56,189,248,0.1)', 100);
+    vibrate(25);
+    S.combo++;
+  } else if (item.type === 'rocket') {
+    S.rocketTimer = 8;
+    S.player.w = 120; // wide basket
+    sfxRocket();
+    burst(item.x, item.y, '#c084fc', 18, false);
+    popup(item.x, item.y - 20, '🚀 WIDE BASKET! 8s', '#c084fc');
+    flashScreen('rgba(192,132,252,0.1)', 100);
+    vibrate(30);
+    S.combo++;
+  } else {
+    const mult = (cfg.tripleCredits ? 3 : 1) * S.multiplier;
+    const earned = Math.round(item.def.value * mult);
+    S.levelCredits += earned;
+    S.totalCredits += earned;
+    S.combo++;
+    if (S.combo > S.bestCombo) S.bestCombo = S.combo;
+
+    if (item.type === 'diamond') {
+      sfxDiamond();
+      burst(item.x, item.y, '#67e8f9', 28, true);
+      flashScreen('rgba(103,232,249,0.12)', 150);
+      vibrate([20, 10, 20, 10, 40]);
+    } else if (item.type === 'card') {
+      sfxCard();
+      burst(item.x, item.y, '#b4ff78', 22, false);
+      vibrate(30);
+    } else {
+      sfxCatch();
+      burst(item.x, item.y, '#3DBE6C', 10, false);
+      vibrate(15);
+    }
+
+    const label = mult > 1 ? `+${earned} ×${mult}` : `+${earned}`;
+    popup(item.x, item.y - 20, label, item.def.color);
+
+    if (S.combo > 0 && S.combo % 5 === 0) {
+      sfxCombo(S.combo);
+      popup(item.x, item.y - 52, `🔥 ${S.combo}× STREAK!`, '#f59e0b');
+      burst(item.x, item.y, '#f59e0b', 18, false);
+      flashScreen('rgba(245,158,11,0.08)', 100);
+    }
+  }
+}
+
+// ─── DRAW ───────────────────────────────────────────────────
+function draw() {
+  ctx.save();
+  ctx.translate(Math.round(S.shake.x), Math.round(S.shake.y));
+
+  // bg
+  const cfg = LEVEL_CONFIGS[S.level - 1];
+  if (cfg.isBoss) {
+    const grad = ctx.createLinearGradient(0, 0, 0, CH);
+    grad.addColorStop(0, '#0d0800');
+    grad.addColorStop(1, '#080500');
+    ctx.fillStyle = grad;
+  } else {
+    ctx.fillStyle = '#090909';
+  }
+  ctx.fillRect(0, 0, CW, CH);
+
+  // grid
+  ctx.strokeStyle = cfg.isBoss ? 'rgba(245,158,11,0.04)' : 'rgba(61,190,108,0.03)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < CW; x += 36) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,CH); ctx.stroke(); }
+  for (let y = 0; y < CH; y += 36) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CW,y); ctx.stroke(); }
+
+  // danger vignette
+  if (S.dangerPulse > 0) {
+    const vGrad = ctx.createRadialGradient(CW/2, CH/2, CW*0.2, CW/2, CH/2, CW*0.8);
+    vGrad.addColorStop(0, 'transparent');
+    vGrad.addColorStop(1, `rgba(239,68,68,${0.18 * S.dangerPulse})`);
+    ctx.fillStyle = vGrad;
+    ctx.fillRect(0, 0, CW, CH);
+  }
+
+  // trails
+  S.trails.forEach(t => {
+    ctx.globalAlpha = t.life * 0.25;
+    ctx.fillStyle = '#3DBE6C';
+    ctx.beginPath();
+    ctx.roundRect(t.x - S.player.w/2, t.y - S.player.h/2, S.player.w, S.player.h, 6);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  // particles
+  S.particles.forEach(p => {
+    ctx.globalAlpha = p.life * 0.9;
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+  ctx.globalAlpha = 1;
+
+  // items
+  S.items.forEach(item => {
+    ctx.save();
+    ctx.globalAlpha = item.alpha;
+    ctx.translate(item.x, item.y);
+    ctx.rotate(item.rotation);
+    ctx.scale(item.scale, item.scale);
+    if (item.def.good) {
+      ctx.shadowColor = item.def.color;
+      ctx.shadowBlur = item.type === 'diamond' ? 28 : 16;
+    }
+    ctx.font = `${item.def.size}px serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.def.emoji, 0, 0);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  });
+
+  drawPlayer();
+
+  // popups
+  S.popups.forEach(p => {
+    ctx.save();
+    ctx.globalAlpha = Math.min(p.life * 1.5, 1);
+    ctx.font = `bold 14px "Syne", sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 10;
+    ctx.fillText(p.text, p.x, p.y);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  });
+
+  drawHUD();
+  ctx.restore();
+}
+
+function drawPlayer() {
+  const px = S.player.x, py = S.player.y;
+  const pw = S.player.w, ph = S.player.h;
+  const cfg = LEVEL_CONFIGS[S.level - 1];
+  const color = cfg.isBoss ? '#f59e0b' : '#3DBE6C';
+  const glow  = cfg.isBoss ? 'rgba(245,158,11,0.5)' : 'rgba(61,190,108,0.45)';
+
+  ctx.save();
+  ctx.translate(px, py);
+  ctx.rotate(S.player.wobble * 0.4);
+
+  // outer glow
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 22;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.roundRect(-pw/2, -ph/2, pw, ph, 8);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // sheen
+  ctx.fillStyle = 'rgba(255,255,255,0.2)';
+  ctx.fillRect(-pw/2 + 4, -ph/2 + 3, pw - 8, 3);
+
+  // panda
+  ctx.font = '22px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('🐼', 0, -20);
+
+  // shield aura
+  if (S.shieldActive) {
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#38bdf8';
+    ctx.shadowBlur = 22;
+    ctx.beginPath();
+    ctx.arc(0, -8, pw * 0.72, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  // multiplier aura
+  if (S.multiplier > 1) {
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#f59e0b';
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.roundRect(-pw/2 - 5, -ph/2 - 5, pw + 10, ph + 10, 11);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  ctx.restore();
+}
+
+function drawHUD() {
+  const cfg = LEVEL_CONFIGS[S.level - 1];
+  const barH = 54, pad = 14;
+
+  // bar
+  const grad = ctx.createLinearGradient(0, 0, 0, barH);
+  grad.addColorStop(0, 'rgba(0,0,0,0.92)');
+  grad.addColorStop(1, 'rgba(0,0,0,0.5)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, CW, barH);
+
+  // lives
+  ctx.font = '17px serif';
+  ctx.textBaseline = 'middle';
+  for (let i = 0; i < 3; i++) {
+    ctx.globalAlpha = i < S.lives ? 1 : 0.15;
+    ctx.shadowColor = i < S.lives ? '#3DBE6C' : 'transparent';
+    ctx.shadowBlur = i < S.lives ? 8 : 0;
+    ctx.fillText('🐼', pad + i * 24, barH/2 - 2);
+    ctx.shadowBlur = 0;
+  }
+  ctx.globalAlpha = 1;
+
+  // level
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 10px "DM Sans", sans-serif';
+  ctx.fillStyle = cfg.isBoss ? '#f59e0b' : 'rgba(255,255,255,0.3)';
+  ctx.textBaseline = 'top';
+  ctx.fillText('LEVEL', CW/2, 7);
+  ctx.font = 'bold 21px "Syne", sans-serif';
+  ctx.fillStyle = cfg.isBoss ? '#f59e0b' : '#fff';
+  if (cfg.isBoss) { ctx.shadowColor = '#f59e0b'; ctx.shadowBlur = 12; }
+  ctx.fillText(S.level, CW/2, 21);
+  ctx.shadowBlur = 0;
+
+  // credits
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 9px "DM Sans", sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.fillText('CREDITS', CW - pad, 7);
+  ctx.font = 'bold 19px "Syne", sans-serif';
+  ctx.fillStyle = '#3DBE6C';
+  ctx.shadowColor = '#3DBE6C';
+  ctx.shadowBlur = 12;
+  ctx.fillText(S.totalCredits, CW - pad, 21);
+  ctx.shadowBlur = 0;
+
+  // time bar
+  const timeRatio = Math.max(0, S.timeLeft / cfg.time);
+  const barY = barH - 5;
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.fillRect(0, barY, CW, 5);
+  const barColor = timeRatio > 0.5 ? '#3DBE6C' : timeRatio > 0.25 ? '#f59e0b' : '#f87171';
+  ctx.fillStyle = barColor;
+  if (timeRatio < 0.25) {
+    ctx.shadowColor = '#f87171';
+    ctx.shadowBlur = 10;
+  }
+  ctx.fillRect(0, barY, CW * timeRatio, 5);
+  ctx.shadowBlur = 0;
+
+  // shield indicator
+  if (S.shieldActive) {
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 10px "DM Sans", sans-serif';
+    ctx.fillStyle = '#38bdf8';
+    ctx.shadowColor = '#38bdf8';
+    ctx.shadowBlur = 8;
+    ctx.fillText('🛡️ SHIELD', pad, CH - 54);
+    ctx.shadowBlur = 0;
+  }
+  // rocket indicator
+  if (S.rocketTimer > 0) {
+    const rr = S.rocketTimer / 8;
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 10px "DM Sans", sans-serif';
+    ctx.fillStyle = '#c084fc';
+    ctx.shadowColor = '#c084fc';
+    ctx.shadowBlur = 8;
+    ctx.fillText(`🚀 WIDE ${Math.ceil(S.rocketTimer)}s`, CW/2 + 40, CH - 54);
+    ctx.shadowBlur = 0;
+  }
+
+  // multiplier bar
+  if (S.multiplier > 1) {
+    const mr = S.multTimer / 7;
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 10px "DM Sans", sans-serif';
+    ctx.fillStyle = '#f59e0b';
+    ctx.shadowColor = '#f59e0b';
+    ctx.shadowBlur = 8;
+    ctx.fillText(`⚡ 2×  ${Math.ceil(S.multTimer)}s`, pad, CH - 38);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(245,158,11,0.18)';
+    ctx.fillRect(pad, CH - 26, (CW - pad*2) * mr, 3);
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(pad, CH - 26, Math.min((CW - pad*2) * mr, CW - pad*2), 3);
+  }
+
+  // combo
+  if (S.combo >= 3) {
+    ctx.textAlign = 'right';
+    ctx.font = `bold 11px "DM Sans", sans-serif`;
+    const cc = S.combo >= 10 ? '#f59e0b' : '#3DBE6C';
+    ctx.fillStyle = cc;
+    ctx.shadowColor = cc;
+    ctx.shadowBlur = 10;
+    ctx.fillText(`🔥 ${S.combo}× STREAK`, CW - pad, CH - 38);
+    ctx.shadowBlur = 0;
+  }
+
+  ctx.textBaseline = 'alphabetic';
+}
+
+// ─── LEVEL COMPLETE ─────────────────────────────────────────
+function levelComplete() {
+  S.running = false;
+  cancelAnimationFrame(S.raf);
+  sfxLevelUp();
+  vibrate([50, 30, 50, 30, 100]);
+
+  const bonus = LEVEL_CONFIGS[S.level - 1].bonus;
+  S.totalCredits += bonus;
+  S.levelCredits += bonus;
+
+  if (S.level === 7) {
+    // Email capture FIRST, then paywall — we want their details before payment
+    showEmailGate();
+  } else if (S.level >= 10) {
+    // All done — show final code
+    showFinalCode();
+  } else {
+    showLevelAnnounce(true);
+  }
+}
+
+function showEmailGate() {
+  // Special email screen before paywall
+  document.getElementById('pge-total').textContent = S.totalCredits;
+  document.getElementById('pge-ey').textContent = '🔒 Unlock Levels 8, 9 & 10';
+  document.getElementById('pge-heading').textContent = 'You\'ve earned';
+  document.getElementById('pge-subtext').textContent = 'Enter your details to unlock the final 3 levels and claim your credits at launch.';
+  document.getElementById('pge-submit').textContent = 'Continue to Unlock →';
+  S._emailMode = 'gate'; // will show paywall after
+  showScreen('pg-email');
+}
+
+function showPaywall() {
+  document.getElementById('pw-credits-earned').textContent = S.totalCredits;
+  showScreen('pg-paywall');
+}
+
+function showFinalCode() {
+  // Already have email from gate — go straight to code
+  S.uniqueCode = generateCode(S.playerEmail, S.totalCredits);
+  const worth = Math.max(1, Math.min(Math.floor(S.totalCredits / 50), 20));
+  const codeEl = document.getElementById('pgc-code');
+  codeEl.textContent = S.uniqueCode + ' 📋';
+  document.getElementById('pgc-worth').textContent = `£${worth}`;
+  const subject = encodeURIComponent(`My Panda Credits Code — ${S.uniqueCode}`);
+  const body = encodeURIComponent(`Hi Duncan,\n\nI completed ALL 10 levels of Panda Credits and earned ${S.totalCredits} credits!\n\nCode: ${S.uniqueCode}\nName: ${S.playerName}\nEmail: ${S.playerEmail}\nBest combo: ${S.bestCombo}×\n\nPlease apply my credits when Panda launches. 🐼`);
+  document.getElementById('pgc-email-link').href = `mailto:duncan@pandaindustry.co?subject=${subject}&body=${body}`;
+  showScreen('pg-code');
+}
+
+function showLevelAnnounce(isComplete) {
+  if (isComplete) {
+    S.level++;
+    document.getElementById('pla-stats').style.display = 'flex';
+    document.getElementById('pla-level-credits').textContent = S.levelCredits;
+    document.getElementById('pla-total-credits').textContent = S.totalCredits;
+  } else {
+    document.getElementById('pla-stats').style.display = 'none';
+  }
+  const cfg = LEVEL_CONFIGS[S.level - 1];
+  const isBoss = cfg.isBoss;
+  const numEl = document.getElementById('pla-num');
+  numEl.textContent = S.level;
+  numEl.className = 'pg-level-badge' + (isBoss ? ' is-boss' : '');
+  document.getElementById('pla-label').textContent = cfg.label;
+  document.getElementById('pla-desc').textContent = cfg.desc;
+  document.getElementById('pla-boss-warning').style.display = isBoss ? 'block' : 'none';
+  document.getElementById('pla-progress-label').textContent = `${S.level} / 10`;
+  document.getElementById('pla-progress-fill').style.width = `${(S.level / 10) * 100}%`;
+  document.getElementById('pla-btn').textContent = isComplete ? `Level ${S.level} →` : 'Start →';
+  document.getElementById('pla-ey').textContent = isBoss ? '🔥 PAID LEVEL' : 'Level';
+  showScreen('pg-level-announce');
+}
+
+function gameOver() {
+  sfxGameOver();
+  vibrate([100, 50, 100, 50, 200]);
+  document.getElementById('pgo-level').textContent = S.level;
+  document.getElementById('pgo-credits').textContent = S.totalCredits;
+  document.getElementById('pgo-credits-btn').textContent = S.totalCredits;
+  document.getElementById('pgo-deaths').textContent = S.totalDeaths;
+
+  const rudeEl = document.getElementById('pgo-rude');
+  const claimBtn = document.getElementById('pgo-claim');
+
+  if (S.level >= 5) {
+    rudeEl.style.display = 'block';
+    rudeEl.textContent = getRudeMsg(S.level);
+    const fury = S.level >= 9 ? 3 : S.level >= 7 ? 2 : 1;
+    document.getElementById('pgo-emoji').textContent = fury === 3 ? '🤬' : fury === 2 ? '💀' : '😭';
+    document.getElementById('pgo-title').innerHTML = fury === 3
+      ? 'Absolutely<br/><span class="red">disgraceful.</span>'
+      : fury === 2
+      ? 'You <span class="red">really</span><br/>are bad at this.'
+      : 'Out of<br/><span class="red">lives.</span>';
+  } else {
+    rudeEl.style.display = 'none';
+    document.getElementById('pgo-emoji').textContent = '😅';
+    document.getElementById('pgo-title').innerHTML = 'Out of<br/><span class="red">lives.</span>';
+  }
+
+  // If they're in paid levels, hide the cheap claim-anyway button — they paid, they retry
+  if (S.level >= 8 && S.paidUnlocked) {
+    claimBtn.style.display = 'none';
+  } else {
+    claimBtn.style.display = 'block';
+  }
+
+  showScreen('pg-gameover');
+}
+
+function startCountdown(cb) {
+  showScreen('pg-countdown');
+  let n = 3;
+  const el  = document.getElementById('pg-cd-num');
+  const ey  = document.getElementById('pg-cd-ey');
+  const cfg = LEVEL_CONFIGS[S.level - 1];
+  ey.textContent = cfg.isBoss ? '💀 FINAL BOSS' : 'Get ready';
+  el.style.color = cfg.isBoss ? '#f59e0b' : '#3DBE6C';
+  el.style.textShadow = cfg.isBoss
+    ? '0 0 40px rgba(245,158,11,0.6)'
+    : '0 0 40px rgba(61,190,108,0.5)';
+
+  function tick() {
+    el.style.animation = 'none'; void el.offsetWidth;
+    el.style.animation = 'pg-pop 0.3s cubic-bezier(0.34,1.56,0.64,1)';
+    sfxCountdown(n);
+    if (n > 0) { el.textContent = n--; setTimeout(tick, 900); }
+    else { el.textContent = 'GO!'; vibrate([30,10,30,10,60]); setTimeout(cb, 650); }
+  }
+  tick();
+}
+
+function startLevel() {
+  S.levelCredits = 0;
+  S.lives = 3;
+  S.levelDeaths = 0;
+  S.items = [];
+  S.particles = [];
+  S.popups = [];
+  S.trails = [];
+  S.multiplier = 1;
+  S.multTimer = 0;
+  S.combo = 0;
+  S.shieldActive = false;
+  S.rocketTimer = 0;
+  S.player.w = 74;
+  const cfg = LEVEL_CONFIGS[S.level - 1];
+  S.timeLeft = cfg.time;
+  S.isBossLevel = cfg.isBoss;
+  S.spawnTimer = 0.5;
+  S.player.x = CW / 2;
+  S.player.targetX = CW / 2;
+  S.player.wobble = 0;
+  S.dangerPulse = 0;
+
+  hideScreens();
+  S.running = true;
+  S.lastTs = performance.now();
+  S.raf = requestAnimationFrame(gameLoop);
+}
+
+function resetGame() {
+  S.level = 1;
+  S.totalCredits = 0;
+  S.totalDeaths = 0;
+  S.bestCombo = 0;
+  S.paidUnlocked = false;
+  S.shieldActive = false;
+  S.rocketTimer = 0;
+  S.player.w = 74;
+}
+
+// ─── CODE GENERATION ────────────────────────────────────────
+function generateCode(email, credits) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  // Seed-ish hash from email + credits for more uniqueness
+  let hash = 0;
+  const seed = email + credits + Date.now();
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+  }
+  let code = 'PANDA-';
+  let h = Math.abs(hash);
+  for (let i = 0; i < 8; i++) {
+    code += chars[(h + Math.floor(Math.random() * chars.length)) % chars.length];
+  }
+  return code;
+}
+
+// ─── COPY TO CLIPBOARD ──────────────────────────────────────
+document.getElementById('pgc-code').addEventListener('click', () => {
+  const code = document.getElementById('pgc-code').textContent.replace(' 📋','');
+  navigator.clipboard && navigator.clipboard.writeText(code).then(() => {
+    document.getElementById('pgc-code').textContent = '✅ Copied!';
+    setTimeout(() => { document.getElementById('pgc-code').textContent = code + ' 📋'; }, 2000);
+  });
+});
+
+// ─── BUTTON WIRING ──────────────────────────────────────────
+document.getElementById('pg-start-btn').addEventListener('click', () => {
+  resetGame();
+  showLevelAnnounce(false);
+});
+
+document.getElementById('pla-btn').addEventListener('click', () => {
+  startCountdown(startLevel);
+});
+
+document.getElementById('pgo-retry').addEventListener('click', () => {
+  // In paid levels, retry at level 8 (don't full reset — keep paid flag)
+  if (S.level >= 8 && S.paidUnlocked) {
+    S.level = 8;
+    showLevelAnnounce(false);
+  } else {
+    resetGame();
+    showLevelAnnounce(false);
+  }
+});
+
+document.getElementById('pgo-claim').addEventListener('click', () => {
+  // Only available in free levels — goes to email capture for code
+  S._emailMode = 'claim';
+  document.getElementById('pge-ey').textContent = 'Claim Your Credits';
+  document.getElementById('pge-heading').textContent = 'You earned';
+  document.getElementById('pge-subtext').textContent = 'Enter your details and we\'ll hold your credits for when Panda launches.';
+  document.getElementById('pge-submit').textContent = 'Get My Code →';
+  document.getElementById('pge-total').textContent = S.totalCredits;
+  showScreen('pg-email');
+});
+
+document.getElementById('pgpw-pay-btn').addEventListener('click', () => {
+  window.open('https://buy.stripe.com/28E3cu84VbqZ9Upd4c8ww01', '_blank');
+  // After Stripe success, call window.unlockPaidLevels()
+});
+
+document.getElementById('pge-submit').addEventListener('click', () => {
+  const email = document.getElementById('pge-email').value.trim();
+  const name  = document.getElementById('pge-name').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('pge-email').style.borderColor = '#f87171';
+    document.getElementById('pge-email').style.boxShadow = '0 0 0 3px rgba(248,113,113,0.2)';
+    return;
+  }
+  S.playerEmail = email;
+  S.playerName  = name || 'Panda Player';
+
+  if (S._emailMode === 'gate') {
+    // Captured details — now show paywall
+    showPaywall();
+  } else {
+    // Claim mode — generate code immediately
+    S.uniqueCode = generateCode(email, S.totalCredits);
+    const worth = Math.max(1, Math.min(Math.floor(S.totalCredits / 50), 20));
+    const codeEl = document.getElementById('pgc-code');
+    codeEl.textContent = S.uniqueCode + ' 📋';
+    document.getElementById('pgc-worth').textContent = `£${worth}`;
+    const subject = encodeURIComponent(`My Panda Credits Code — ${S.uniqueCode}`);
+    const body = encodeURIComponent(`Hi Duncan,\n\nI played Panda Credits and earned ${S.totalCredits} credits!\n\nCode: ${S.uniqueCode}\nName: ${S.playerName}\nEmail: ${email}\nBest combo: ${S.bestCombo}×\n\nPlease apply my credits when Panda launches. 🐼`);
+    document.getElementById('pgc-email-link').href = `mailto:duncan@pandaindustry.co?subject=${subject}&body=${body}`;
+    showScreen('pg-code');
+  }
+});
+
+document.getElementById('pgc-play-again').addEventListener('click', () => {
+  resetGame();
+  showLevelAnnounce(false);
+});
+
+// Called after successful Stripe payment
+window.unlockPaidLevels = function() {
+  S.paidUnlocked = true;
+  S.level = 8;
+  showLevelAnnounce(false);
+};
+
+// ─── STRIPE REDIRECT AUTO-UNLOCK ────────────────────────────
+// Detects ?paid=true in URL (set as Stripe success redirect)
+(function checkStripePaid() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('paid') === 'true') {
+    // Clean the URL so refreshing doesn't re-trigger
+    window.history.replaceState({}, document.title, window.location.pathname);
+    // Short delay to let the game init first
+    setTimeout(() => {
+      window.unlockPaidLevels();
+    }, 400);
+  }
+})();
+
+// ─── INIT DRAW ──────────────────────────────────────────────
+ctx.fillStyle = '#090909';
+ctx.fillRect(0, 0, CW, CH);
+
+})();
+</script>
+</body>
+</html>
