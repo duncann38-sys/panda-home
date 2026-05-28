@@ -13,21 +13,36 @@
   --tx:#111827;--gy:#6B7280;--lg:#E5E7EB;--xlg:#F3F4F6;
   --fd:'Sora',sans-serif;--fb:'DM Sans',sans-serif;
   --shadow:0 4px 24px rgba(26,60,46,.08);
+  --nav-h:64px;
 }
 html{scroll-behavior:smooth}
-body{font-family:var(--fb);color:var(--tx);background:var(--wh);overflow-x:hidden}
+body{font-family:var(--fb);color:var(--tx);background:var(--wh);overflow-x:hidden;padding-top:var(--nav-h)}
 
 /* ── NAVIGATION ── */
-nav{
+.nav{
   position:fixed;top:0;left:0;right:0;z-index:9999;
-  background:#1A3C2E;padding:14px 6vw;
+  background:var(--gd);height:var(--nav-h);
+  padding:0 6vw;
   display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 2px 20px rgba(0,0,0,.15);
 }
-nav a:first-child{color:#52B788;font-family:var(--fd);font-size:18px;font-weight:800;text-decoration:none;}
-nav div{display:flex;gap:28px;}
-nav a:not(:first-child){color:rgba(255,255,255,.8);font-size:14px;text-decoration:none;font-family:var(--fb);}
-nav a:not(:first-child):hover{color:#52B788;transition:color 0.2s;}
-body>:not(nav){margin-top:52px;}
+.nav-logo{
+  color:var(--gb);font-family:var(--fd);font-size:20px;font-weight:800;
+  text-decoration:none;display:flex;align-items:center;gap:8px;letter-spacing:-0.5px;
+}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{
+  color:rgba(255,255,255,.75);font-size:14px;font-weight:500;
+  text-decoration:none;font-family:var(--fb);
+  transition:color .2s;letter-spacing:.01em;
+}
+.nav-links a:hover{color:#fff}
+.nav-links a.nav-cta{
+  background:var(--gm);color:white;
+  padding:8px 20px;border-radius:100px;
+  font-weight:600;transition:all .2s;
+}
+.nav-links a.nav-cta:hover{background:var(--gb);transform:translateY(-1px)}
 
 /* ── HERO ── */
 .hero{
@@ -36,7 +51,6 @@ body>:not(nav){margin-top:52px;}
   position:relative;overflow:hidden;
   border-bottom:1px solid rgba(82,183,136,.12);
 }
-/* Soft radial glow */
 .hero::before{
   content:'';position:absolute;top:-200px;right:-150px;
   width:700px;height:700px;border-radius:50%;
@@ -56,14 +70,11 @@ body>:not(nav){margin-top:52px;}
     linear-gradient(90deg,rgba(82,183,136,.04) 1px,transparent 1px);
   background-size:60px 60px;
 }
-
 .hero-inner{
   max-width:1200px;margin:0 auto;
   display:grid;grid-template-columns:1fr 1fr;
   gap:60px;align-items:center;position:relative;z-index:2;
 }
-
-/* Logo + welcome */
 .hero-tag{
   display:inline-flex;align-items:center;gap:10px;
   background:rgba(82,183,136,.1);border:1px solid rgba(82,183,136,.25);
@@ -73,7 +84,6 @@ body>:not(nav){margin-top:52px;}
 }
 .tag-dot{width:6px;height:6px;border-radius:50%;background:var(--gb);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.6)}}
-
 .welcome-line{
   font-family:var(--fd);font-size:clamp(14px,1.2vw,16px);font-weight:600;
   letter-spacing:2px;text-transform:uppercase;color:var(--gm);
@@ -86,18 +96,11 @@ h1{
   color:var(--tx);margin-bottom:20px;
 }
 h1 .green{color:var(--gm)}
-h1 .outline{
-  color:transparent;
-  -webkit-text-stroke:2px var(--gm);
-}
-
 .hero-sub{
   font-size:clamp(15px,1.5vw,18px);color:var(--gy);
   line-height:1.75;max-width:480px;margin-bottom:36px;font-weight:300;
 }
 .hero-sub strong{color:var(--gd);font-weight:600}
-
-/* Pill stats */
 .hero-pills{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:36px}
 .hpill{
   background:white;border:1.5px solid rgba(82,183,136,.2);
@@ -107,7 +110,6 @@ h1 .outline{
   display:flex;align-items:center;gap:6px;
 }
 .hpill span{color:var(--gm);font-size:16px;font-weight:800}
-
 .hero-btns{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
 .btn-main{
   display:inline-flex;align-items:center;gap:8px;
@@ -126,8 +128,6 @@ h1 .outline{
   transition:color .2s;padding:8px 0;
 }
 .btn-sec:hover{color:var(--gm)}
-
-/* Hero right — logo + video */
 .hero-right{
   display:flex;flex-direction:column;align-items:center;gap:24px;
 }
@@ -146,8 +146,6 @@ h1 .outline{
   color:var(--gd);letter-spacing:-1px;
 }
 .logo-tagline{font-size:13px;color:var(--gy);font-weight:400}
-
-/* Video */
 .video-wrap{
   width:100%;max-width:340px;
   border-radius:20px;overflow:hidden;
@@ -192,7 +190,6 @@ h2{
   margin-bottom:14px;color:var(--tx);
 }
 .sec-p{font-size:17px;color:var(--gy);line-height:1.75;max-width:560px;font-weight:300;margin-bottom:52px}
-
 .feature-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .fcard{
   background:var(--of);border:1.5px solid var(--lg);border-radius:20px;
@@ -211,15 +208,13 @@ h2{
   margin-bottom:4px;letter-spacing:-1px;
 }
 
-/* ── EXPERIENCE SECTION (from existing code) ── */
+/* ── EXPERIENCE SECTION ── */
 .exp-section{
   padding:90px 6vw;
   background:linear-gradient(180deg,white 0%,var(--gl) 100%);
 }
 .exp-inner{max-width:1200px;margin:0 auto}
 .exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;margin-top:52px}
-
-/* Video col */
 .exp-video-wrap{position:relative}
 .exp-video-frame{
   border-radius:24px;overflow:hidden;
@@ -240,8 +235,6 @@ h2{
   background-image:radial-gradient(circle,var(--gm) 1.5px,transparent 1.5px);
   background-size:12px 12px;opacity:.2;
 }
-
-/* Benefits */
 .benefits{display:flex;flex-direction:column;gap:0}
 .bitem{
   display:flex;gap:18px;padding:22px 0;
@@ -310,7 +303,7 @@ h2{
 .step h4{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--tx);margin-bottom:8px}
 .step p{font-size:13px;color:var(--gy);line-height:1.65}
 
-/* ── STATS STRIP ── */
+/* ── STATS ── */
 .stats{
   background:linear-gradient(135deg,var(--gd),#1f5c3a);
   padding:72px 6vw;
@@ -372,6 +365,7 @@ footer{
   .steps,.stats-inner{grid-template-columns:1fr 1fr}
   .steps::before{display:none}
   .hero-right{flex-direction:row;justify-content:center;flex-wrap:wrap}
+  .nav-links a:not(.nav-cta){display:none}
 }
 @media(max-width:600px){
   .feature-grid,.steps,.stats-inner{grid-template-columns:1fr}
@@ -381,13 +375,15 @@ footer{
 </head>
 <body>
 
-<nav>
-  <a href="/">🐼 Panda</a>
-  <div>
+<!-- ── NAVIGATION ── -->
+<nav class="nav">
+  <a href="/" class="nav-logo">🐼 panda</a>
+  <div class="nav-links">
     <a href="/">Home</a>
     <a href="/how-it-works/">How It Works</a>
     <a href="/game/">Game</a>
     <a href="/legal/">Legal</a>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdcxPUi1Va-5AYS9eEZySIjJoUSXHFLGCcmTCpWqC7N8ctMlg/viewform" target="_blank" class="nav-cta">Join Waitlist</a>
   </div>
 </nav>
 
@@ -404,7 +400,7 @@ footer{
         nights out.
       </h1>
       <p class="hero-sub">
-        The UK's first <strong>MCC-locked hospitality credit card</strong> built exclusively for 18–30s. Get up to £1,000 to spend at restaurants, bars and cafés. One flat fee. Repay in three easy[...]
+        The UK's first <strong>MCC-locked hospitality credit card</strong> built exclusively for 18–30s. Get up to £1,000 to spend at restaurants, bars and cafés. One flat fee. Repay in three easy instalments.
       </p>
       <div class="hero-pills">
         <div class="hpill"><span>£300–£1k</span> Credit limit</div>
@@ -415,15 +411,14 @@ footer{
       <div class="hero-btns">
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSdcxPUi1Va-5AYS9eEZySIjJoUSXHFLGCcmTCpWqC7N8ctMlg/viewform" target="_blank" class="btn-main">
           Join the Waitlist
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12[...]
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
         <a href="#how" class="btn-sec">How it works <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></a>
       </div>
     </div>
-
     <div class="hero-right">
       <div class="logo-wrap">
-        <img class="logo-img" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ[...]
+        <img class="logo-img" src="https://duncann38-sys.github.io/panda-home/panda-logo.jpg" alt="Panda" onerror="this.style.display='none'">
         <div class="logo-name">panda</div>
         <div class="logo-tagline">Credit built for going out</div>
       </div>
@@ -620,13 +615,12 @@ footer{
 <!-- ── CTA ── -->
 <section class="cta">
   <div class="cta-inner rv">
-    <img class="cta-logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA[...]
     <div class="sec-lbl" style="justify-content:center;margin-bottom:14px"><span style="width:0"></span>Limited early access</div>
     <h2>Your table is <em>waiting.</em></h2>
     <p>Join 500+ students already on the waitlist. Early members get first access, exclusive perks, and the chance to become a Panda campus ambassador.</p>
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSdcxPUi1Va-5AYS9eEZySIjJoUSXHFLGCcmTCpWqC7N8ctMlg/viewform" target="_blank" class="btn-cta">
       Join the Waitlist — It's Free
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 [...]
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
     </a>
     <p class="cta-fine">Under 60 seconds · No credit check to join · 18+ · UK residents only</p>
   </div>
@@ -635,7 +629,6 @@ footer{
 <!-- ── FOOTER ── -->
 <footer>
   <div class="flogo-wrap">
-    <img class="flogo-img" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9[...]
     <span class="flogo-txt">panda</span>
   </div>
   <div class="ftxt">
