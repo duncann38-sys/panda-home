@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -304,6 +305,16 @@ h2{
 .step h4{font-family:var(--fd);font-size:14px;font-weight:700;color:var(--tx);margin-bottom:8px}
 .step p{font-size:13px;color:var(--gy);line-height:1.65}
 
+/* ── TRY THE APP ── */
+.tryapp{padding:64px 6vw;background:var(--of);border-top:1px solid var(--lg);text-align:center}
+.tryapp-inner{max-width:620px;margin:0 auto}
+.tryapp-h{
+  font-family:var(--fd);font-size:clamp(22px,2.8vw,30px);font-weight:800;
+  letter-spacing:-1px;line-height:1.15;color:var(--tx);margin-bottom:12px;
+}
+.tryapp-p{font-size:16px;color:var(--gy);line-height:1.7;font-weight:300;margin-bottom:30px}
+.tryapp-fine{margin-top:16px;font-size:12px;color:rgba(107,114,128,.6)}
+
 /* ── STATS ── */
 .stats{
   background:linear-gradient(135deg,var(--gd),#1f5c3a);
@@ -383,6 +394,7 @@ footer{
     <a href="/">Home</a>
     <a href="/how-it-works/">How It Works</a>
     <a href="/game/">Game</a>
+    <a href="https://duncann38-sys.github.io/PANDA-DEMO/" target="_blank" rel="noopener">Try the App</a>
     <a href="/legal/">Legal</a>
     <a href="https://docs.google.com/forms/d/e/1FAIpQLSdcxPUi1Va-5AYS9eEZySIjJoUSXHFLGCcmTCpWqC7N8ctMlg/viewform" target="_blank" class="nav-cta">Join Waitlist</a>
   </div>
@@ -602,6 +614,20 @@ footer{
     </div>
   </div>
 </section>
+
+<!-- ── TRY THE APP ── -->
+<div class="tryapp">
+  <div class="tryapp-inner rv">
+    <div class="sec-lbl" style="justify-content:center"><span style="width:0"></span>See it for yourself</div>
+    <h3 class="tryapp-h">The Panda app is live to try.</h3>
+    <p class="tryapp-p">Find a venue, apply for your limit, pay at the table — the same journey a customer sees. No download, no sign-up.</p>
+    <a href="https://duncann38-sys.github.io/PANDA-DEMO/" target="_blank" rel="noopener" class="btn-main">
+      Try the app
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+    <p class="tryapp-fine">Preview build · sample venues and test data</p>
+  </div>
+</div>
 
 <!-- ── STATS ── -->
 <div class="stats">
